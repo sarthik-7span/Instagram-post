@@ -26,7 +26,6 @@ const INITIAL_STATE = {
   setIsAuthenticated: () => {},
   checkAuthUser: async () => false as boolean,
 };
-
 const AuthContext = createContext<IContextType>(INITIAL_STATE);
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
