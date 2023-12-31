@@ -17,14 +17,23 @@ import { PostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import { useUserContext } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useCreatePost } from "@/lib/react-query/queriesAndMutations";
+import {
+  UseUpdatePost,
+  useCreatePost,
+} from "@/lib/react-query/queriesAndMutations";
 import { useToast } from "../ui/use-toast";
 
 type PostFormProps = {
   post?: Models.Document;
+  action: "Create" | "Update";
 };
-const PostForm = ({ post }: PostFormProps) => {
-  const { mutateAsync: createPost } = useCreatePost();
+
+const PostForm = ({ post, action }: PostFormProps) => {
+  const { mutateAsync: createPost, isPending: isLoadingCreate } =
+    useCreatePost();
+  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+    UseUpdatePost();
+
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useUserContext();
@@ -35,11 +44,25 @@ const PostForm = ({ post }: PostFormProps) => {
       caption: post ? post?.caption : "",
       file: [],
       location: post ? post?.location : "",
-      tags: post ? post.tags.join(",") : "",
+      tags: post ? post.tag.join(",") : "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof PostValidation>) => {
+    if (post && action === "Update") {
+      const updatedPost = await updatePost({
+        ...values,
+        postId: post.$id,
+        imageId: post?.imageId,
+        imageUrl: post?.imageUrl,
+      });
+      if (!updatedPost) {
+        return toast({
+          title: "Please try again.",
+        });
+      }
+      return navigate(`/posts/${post.$id}`);
+    }
     const newPost = await createPost({
       ...values,
       userId: user.id,
@@ -130,8 +153,11 @@ const PostForm = ({ post }: PostFormProps) => {
           <Button
             type="submit"
             className="shad-button_primary whitespace-nowrap"
+            disabled={isLoadingUpdate || isLoadingCreate}
           >
-            Submit
+            {isLoadingUpdate || isLoadingCreate
+              ? "Loading.."
+              : `${action} post`}
           </Button>
         </div>
       </form>
