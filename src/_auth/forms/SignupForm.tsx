@@ -27,8 +27,10 @@ const SignupForm = () => {
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
   // one type of hook and : rename the actual names
-  const { mutateAsync: createUserAccount } = useCreateUserAccount();
-  const { mutateAsync: signInAccount } = useSignInAccount();
+  const { mutateAsync: createUserAccount, isPending: isCreatingAccount } =
+    useCreateUserAccount();
+  const { mutateAsync: signInAccount, isPending: isSigningInUser } =
+    useSignInAccount();
 
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -135,7 +137,7 @@ const SignupForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary">
-            {isUserLoading ? (
+            {isCreatingAccount || isSigningInUser || isUserLoading ? (
               <div className="flex gap-2 items-center">
                 <Loader /> Loading...
               </div>
