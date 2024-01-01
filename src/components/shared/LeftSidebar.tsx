@@ -5,6 +5,7 @@ import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { sidebarLinks } from "@/constant";
 import { INavLink } from "@/types";
+import Loader from "./Loader";
 
 const LeftSidebar = () => {
   const { pathname } = useLocation();
@@ -72,7 +73,7 @@ const LeftSidebar = () => {
       <Button
         variant="ghost"
         className="shad-button_ghost"
-        onClick={() => signOut}
+        onClick={() => signOut()}
       >
         <img src="/assets/icons/logout.svg" alt="logout" />
         <p className="small-medium md:base-medium">Log Out</p>

@@ -4,7 +4,7 @@ import {
   useLikePost,
   useSavePost,
 } from "@/lib/react-query/queriesAndMutations";
-import { checkIsLiked } from "@/lib/utils";
+// import { checkIsLiked } from "@/lib/utils";
 import { Models } from "appwrite";
 import React, { useEffect, useState } from "react";
 import Loader from "./Loader";
@@ -18,6 +18,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
 
   const [likes, setLikes] = useState(likeList);
   const [isSaved, setIsSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(likes.includes(userId));
 
   const { mutate: likePost } = useLikePost();
   const { mutate: savePost, isPending: isSavingPost } = useSavePost();
@@ -29,13 +30,15 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   const handleLikePost = (e: React.MouseEvent) => {
     e.stopPropagation();
     let newLikes = [...likes];
+
     const hasLike = newLikes.includes(userId);
     if (hasLike) {
       newLikes = newLikes.filter((id) => id !== userId);
+      setIsLiked(false);
     } else {
       newLikes.push(userId);
+      setIsLiked(true);
     }
-
     setLikes(newLikes);
     likePost({ postId: post?.$id || "", likesArray: newLikes });
   };
@@ -44,8 +47,11 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   const savedPostRecord = currentUser?.save.find(
     (record: Models.Document) => record.post.$id === post?.$id
   );
+  const likePostRecord = likes.includes(userId);
+
   useEffect(() => {
     setIsSaved(!!savedPostRecord);
+    setIsLiked(!!likePostRecord);
   }, [currentUser]);
 
   const handleSavePost = (e: React.MouseEvent) => {
@@ -58,15 +64,12 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
       setIsSaved(true);
     }
   };
+
   return (
     <div className="flex justify-between items-center z-30 mt-4">
-      <div className="flex gap-2 mr-5">
+      <div className="flex gap-2 mr-5 items-center">
         <img
-          src={
-            checkIsLiked(likeList, userId)
-              ? "/assets/icons/liked.svg"
-              : "/assets/icons/like.svg"
-          }
+          src={isLiked ? "/assets/icons/liked.svg" : "/assets/icons/like.svg"}
           alt="heart"
           width={30}
           height={30}

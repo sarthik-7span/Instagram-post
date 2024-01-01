@@ -14,6 +14,7 @@ import {
   getInfinitePosts,
   getPostById,
   getRecentPosts,
+  getSavedPosts,
   likePost,
   savePost,
   searchPosts,
@@ -152,7 +153,6 @@ export const UseUpdatePost = () => {
     },
   });
 };
-
 export const UseDeletePost = () => {
   const queryClient = useQueryClient();
   return useMutation({

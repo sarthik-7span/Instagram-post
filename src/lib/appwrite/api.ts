@@ -1,8 +1,6 @@
-import { ID, Permission, Query, Role } from "appwrite";
+import { ID, Query } from "appwrite";
 import { appwriteConfig, account, databases, storage, avatars } from "./config";
 import { INewPost, INewUser, IUpdatePost } from "@/types";
-import { string } from "zod";
-import { log } from "console";
 
 // Function to create a user account
 export async function createUserAccount(user: INewUser) {
@@ -25,7 +23,7 @@ export async function createUserAccount(user: INewUser) {
 
     // Save user details to the database
     const newUser = await saveUserToDB({
-      accountId: newAccount.$id,
+      accountid: newAccount.$id,
       email: newAccount.email,
       name: newAccount.name,
       username: user.username,
@@ -42,7 +40,7 @@ export async function createUserAccount(user: INewUser) {
 
 // Function to save user details to the database
 export async function saveUserToDB(user: {
-  accountId: string;
+  accountid: string;
   email: string;
   name: string;
   username?: string;
