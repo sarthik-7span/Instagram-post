@@ -345,3 +345,45 @@ export async function searchPosts(searchTerm: string) {
     console.log(error);
   }
 }
+export async function getSavedPosts(userId: string) {
+  try {
+    const savedPost = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.saveCollectionId,
+      [Query.orderDesc("$createdAt"), Query.limit(20)]
+    );
+    if (!savedPost) throw Error;
+    const filteredSavedPost = savedPost.documents.filter(
+      (post) => post.user.$id === userId
+    );
+
+    return filteredSavedPost;
+  } catch (error) {
+    console.log(error);
+  }
+}
+export async function getAllUsers() {
+  try {
+    const currentUser = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      [Query.orderDesc("$createdAt"), Query.limit(20)]
+    );
+    if (!currentUser) throw Error;
+    return currentUser;
+  } catch (error) {
+    console.log(error);
+  }
+}
+export async function getUserById(userId: string) {
+  try {
+    const user = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userId
+    );
+    return user;
+  } catch (error) {
+    console.log(error);
+  }
+}

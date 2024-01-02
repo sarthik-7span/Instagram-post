@@ -1,28 +1,38 @@
 import PostStats from "@/components/shared/PostStats";
 import { Button } from "@/components/ui/button";
 import { useUserContext } from "@/context/AuthContext";
-import { getPostById } from "@/lib/appwrite/api";
-import { UseGetPostById } from "@/lib/react-query/queriesAndMutations";
+import {
+  UseDeletePost,
+  UseGetPostById,
+} from "@/lib/react-query/queriesAndMutations";
 import { timeAgo } from "@/lib/utils";
 import { Loader } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const PostDetails = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const { data: post, isPending } = UseGetPostById(id || "");
   const { user } = useUserContext();
-  const handleDeletePost = () => {};
+  const { mutate: deleteData } = UseDeletePost();
+
+  const handleDeletePost = () => {
+    deleteData({ postId: id, imageId: post?.imageId });
+    navigate(-1);
+  };
+  console.log(UseDeletePost());
+
   return (
     <div className="post_details-container">
       {isPending ? (
         <Loader />
       ) : (
-        <div className="post_details-card">
+        <div className="post_details-card overflow-hidden lg:h-[500px]">
           <div className="xl:w-1/2">
             <img
               src={post?.imageUrl}
               alt="creator"
-              className="post_detail-img"
+              className="post_detail-img object-cover h-full"
             />
           </div>
           <div className="post_details-info xl:w-1/2">
@@ -56,31 +66,31 @@ const PostDetails = () => {
                 </div>
               </Link>
               <div className="flex-center gap-4">
-                <Link
-                  to={`/update-post/${post?.$id}`}
-                  className={`${user.id !== post?.creator.$id} && "hidden"`}
-                >
-                  <img
-                    src="/assets/icons/edit.svg"
-                    alt="edit"
-                    width={24}
-                    height={24}
-                  />
-                </Link>
-                <Button
-                  onClick={handleDeletePost}
-                  variant="ghost"
-                  className={`ghost_details-delete-btn ${
-                    user.id !== post?.creator.$id
-                  } && "hidden"`}
-                >
-                  <img
-                    src="/assets/icons/delete.svg"
-                    alt="delete"
-                    width={24}
-                    height={24}
-                  />
-                </Button>
+                {user.id == post?.creator.$id && (
+                  <>
+                    {" "}
+                    <Link to={`/update-post/${post?.$id}`}>
+                      <img
+                        src="/assets/icons/edit.svg"
+                        alt="edit"
+                        width={24}
+                        height={24}
+                      />
+                    </Link>
+                    <Button
+                      onClick={handleDeletePost}
+                      variant="ghost"
+                      className="ghost_details-delete-btn"
+                    >
+                      <img
+                        src="/assets/icons/delete.svg"
+                        alt="delete"
+                        width={24}
+                        height={24}
+                      />
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
             <hr className="border w-full border-dark-4/80" />

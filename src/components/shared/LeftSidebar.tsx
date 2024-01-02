@@ -21,7 +21,7 @@ const LeftSidebar = () => {
   }, [issuccess]);
 
   return (
-    <nav className="leftsidebar">
+    <nav className="leftsidebar shadow-xl shadow-slate-600">
       <div className="flex gap-11 flex-col">
         <Link to="/" className="flex gap-3 items-center">
           <img
