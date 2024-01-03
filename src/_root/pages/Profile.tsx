@@ -12,7 +12,10 @@ import { useUserContext } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/shared/Loader";
 import GridPostList from "@/components/shared/GridPostList";
-import { UseGetUserById } from "@/lib/react-query/queriesAndMutations";
+import {
+  UseGetUserById,
+  useGetPostByUser,
+} from "@/lib/react-query/queriesAndMutations";
 
 interface StabBlockProps {
   value: string | number;
@@ -27,20 +30,17 @@ const StatBlock = ({ value, label }: StabBlockProps) => (
 );
 
 const Profile = () => {
-  const { id } = useParams();
+  const { id } = useParams() || { id: "" };
   const { user } = useUserContext();
   const { pathname } = useLocation();
 
   const { data: currentUser } = UseGetUserById(id || "");
-
-  if (!currentUser)
-    return (
-      <div className="flex-center w-full h-full">
-        <Loader />
-      </div>
-    );
-
-  return (
+  const { data: isdata } = useGetPostByUser();
+  return !currentUser ? (
+    <div className="flex-center w-full h-full">
+      <Loader />
+    </div>
+  ) : (
     <div className="profile-container">
       <div className="profile-inner_container">
         <div className="flex xl:flex-row flex-col max-xl:items-center flex-1 gap-7">
@@ -60,20 +60,18 @@ const Profile = () => {
                 @{currentUser.username}
               </p>
             </div>
-
             <div className="flex gap-8 mt-10 items-center justify-center xl:justify-start flex-wrap z-20">
               <StatBlock value={currentUser.posts.length} label="Posts" />
               <StatBlock value={"1M"} label="Followers" />
               <StatBlock value={350} label="Following" />
             </div>
-
             <p className="small-medium md:base-medium text-center xl:text-left mt-7 max-w-screen-sm">
               {currentUser.bio}
             </p>
           </div>
 
           <div className="flex justify-center gap-4">
-            <div className={`${user.id !== currentUser.$id && "hidden"}`}>
+            {user.id == currentUser.$id && (
               <Link
                 to={`/update-profile/${currentUser.$id}`}
                 className={`h-12 bg-dark-4 px-5 text-light-1 flex-center gap-2 rounded-lg ${
@@ -90,12 +88,12 @@ const Profile = () => {
                   Edit Profile
                 </p>
               </Link>
-            </div>
-            <div className={`${user.id === id && "hidden"}`}>
+            )}
+            {user.id !== id && (
               <Button type="button" className="shad-button_primary px-8">
                 Follow
               </Button>
-            </div>
+            )}
           </div>
         </div>
       </div>

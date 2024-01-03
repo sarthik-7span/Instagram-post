@@ -20,7 +20,6 @@ const PostDetails = () => {
     deleteData({ postId: id, imageId: post?.imageId });
     navigate(-1);
   };
-  console.log(UseDeletePost());
 
   return (
     <div className="post_details-container">

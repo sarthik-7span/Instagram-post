@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 const AllUsers = () => {
   const { data: allUserData, isPending: isUserPending } = useGetAllUser();
-  console.log(allUserData);
 
   return isUserPending ? (
     <div className="flex-center w-full h-full">

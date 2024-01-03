@@ -1,6 +1,7 @@
 import { ID, Query } from "appwrite";
 import { appwriteConfig, account, databases, storage, avatars } from "./config";
-import { INewPost, INewUser, IUpdatePost } from "@/types";
+import { INewPost, INewUser, IUpdatePost, IUpdateUser } from "@/types";
+import { debug } from "console";
 
 // Function to create a user account
 export async function createUserAccount(user: INewUser) {
@@ -316,7 +317,7 @@ export async function deletePost(postId: string, imageId: string) {
   }
 }
 export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
-  const queries: any[] = [Query.orderAsc("$updatedAt"), Query.limit(10)];
+  const queries: any[] = [Query.orderAsc("$updatedAt"), Query.limit(30)];
   if (pageParam) {
     queries.push(Query.cursorAfter(pageParam.toString()));
   }
@@ -385,5 +386,67 @@ export async function getUserById(userId: string) {
     return user;
   } catch (error) {
     console.log(error);
+  }
+}
+export async function getPostByUser(userId: string) {
+  try {
+    const postByUser = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      [Query.orderDesc("$createdAt"), Query.limit(20)]
+    );
+    if (!postByUser) throw Error;
+    const filteredPostByUser = postByUser.documents.filter(
+      (post) => post.creator.$id === userId
+    );
+
+    return filteredPostByUser;
+  } catch (error) {
+    console.log(error);
+  }
+}
+export async function updateUser(user: IUpdateUser) {
+  try {
+    const response = await fetch(user.imageUrl);
+    const blob = await response.blob();
+    const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+
+    const uploadedFile = await storage.createFile(
+      appwriteConfig.storageId,
+      ID.unique(),
+      file
+    );
+    const fileUrl = getFilePreview(uploadedFile.$id);
+    if (!fileUrl) {
+      await deleteFile(user.imageId);
+      throw Error;
+    }
+    if (!uploadedFile.$id) {
+      throw new Error("Error uploading file to storage");
+    }
+    console.log(fileUrl);
+
+    const updatedUser = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      user.userId,
+      {
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        bio: user.bio,
+        imageUrl: fileUrl,
+      }
+    );
+
+    if (!updatedUser) {
+      await deleteFile(uploadedFile.$id);
+      throw new Error("Error updating user data in the database");
+    }
+
+    return updatedUser;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 }
