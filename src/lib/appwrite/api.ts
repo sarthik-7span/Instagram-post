@@ -270,6 +270,7 @@ export async function updatePost(post: IUpdatePost) {
         await deleteFile(post.imageId);
         throw Error;
       }
+
       image = {
         ...image,
         imageUrl: fileUrl,
